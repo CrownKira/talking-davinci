@@ -28,7 +28,6 @@ def generate_text(prompt):
 # Create a function to convert text to speech using a text-to-speech library or service
 def text_to_speech(text):
     # Use a text-to-speech library or service to convert the text to speech
-    # speech = # Convert the text to speech here
     engine = pyttsx3.init()
     engine.say(text)
 
