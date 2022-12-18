@@ -11,6 +11,9 @@ import speech_recognition as sr
 
 # Set up OpenAI API key
 openai.api_key = os.environ["OPENAI_API_KEY"]
+
+
+# Customize the AI
 LANGUAGE = "zh-TW"
 VOICE = "Microsoft Server Speech Text to Speech Voice (zh-TW, HsiaoChenNeural)"
 CHARACTER = "farmer"
@@ -20,7 +23,6 @@ TRAITS = "helpful, creative, clever, and very friendly"
 start_sequence: str = "\nAI:"
 restart_sequence: str = "\nHuman: "
 # Set the initial value of acc_prompt
-# acc_prompt = "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n\nHuman: Hello, who are you?\nAI: I am an AI created by OpenAI. How can I help you today?\nHuman: "
 acc_prompt = f"The following is a conversation with a {CHARACTER}. The {CHARACTER} is {TRAITS}.\n{restart_sequence} "
 
 
