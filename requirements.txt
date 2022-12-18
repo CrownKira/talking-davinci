@@ -1,3 +1,5 @@
 openai
 pyttsx3
 SpeechRecognition
+edge_tts
+playsound
