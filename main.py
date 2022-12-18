@@ -14,19 +14,43 @@ openai.api_key = os.environ["OPENAI_API_KEY"]
 LANGUAGE = "zh-TW"
 VOICE = "Microsoft Server Speech Text to Speech Voice (zh-TW, HsiaoChenNeural)"
 
+start_sequence: str = "\nAI:"
+restart_sequence: str = "\nHuman: "
+# Set the initial value of acc_prompt
+acc_prompt = "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n\nHuman: Hello, who are you?\nAI: I am an AI created by OpenAI. How can I help you today?\nHuman: "
+
 
 async def generate_response(prompt):
     """
     Generate a response using the OpenAI language model
     """
+    global acc_prompt
+    # Update the value of acc_prompt by appending the prompt and start_sequence to it
+    acc_prompt += f"{prompt}{start_sequence} "
+
+    # For debugging
+    print("=======")
+    print("Prompt: \n", acc_prompt, end="")
+
+    # Use the updated value of acc_prompt as the prompt for the OpenAI language model
     response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=1024,
-        n=1,
-        stop=None,
+        model="text-davinci-003",
+        prompt=acc_prompt,
+        temperature=0.9,
+        max_tokens=150,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0.6,
+        stop=[" Human:", " AI:"],
     )
-    return response["choices"][0]["text"]
+
+    response_text = response["choices"][0]["text"]
+    acc_prompt += response_text + restart_sequence
+
+    print(response_text)
+    print("=======")
+
+    return response_text
 
 
 async def main():
