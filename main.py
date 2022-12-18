@@ -1,18 +1,24 @@
 # Import necessary modules
-import openai
+import asyncio
 import os
-import pyttsx3
+import tempfile
+from playsound import playsound
 
-# Import the necessary libraries
+import edge_tts
+import openai
 import speech_recognition as sr
 
 
 # Set up OpenAI API key
 openai.api_key = os.environ["OPENAI_API_KEY"]
+LANGUAGE = "zh-TW"
+VOICE = "Microsoft Server Speech Text to Speech Voice (zh-TW, HsiaoChenNeural)"
 
-# Create a function to generate text using the OpenAI language model
-def generate_text(prompt):
-    # Use the OpenAI language model to generate text
+
+async def generate_response(prompt):
+    """
+    Generate a response using the OpenAI language model
+    """
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt=prompt,
@@ -20,57 +26,44 @@ def generate_text(prompt):
         n=1,
         stop=None,
     )
-
-    # Return the generated text
     return response["choices"][0]["text"]
 
 
-# Create a function to convert text to speech using a text-to-speech library or service
-def text_to_speech(text):
-    # Use a text-to-speech library or service to convert the text to speech
-    # speech = # Convert the text to speech here
-    engine = pyttsx3.init()
-    engine.say(text)
+async def main():
+    """
+    Main function
+    """
+    # Create a new speech recognition object
+    recognizer = sr.Recognizer()
 
-    return engine
+    # Continuously listen for and handle user input
+    while True:
+        # Listen for user input
+        with sr.Microphone() as source:
+            print("Listening for input...")
+            recognizer.adjust_for_ambient_noise(source, duration=1)
+            audio = recognizer.listen(source)
+
+        # Recognize the user's speech
+        try:
+            input_text = recognizer.recognize_google(audio, language=LANGUAGE)
+            print("Input text: " + str(input_text))
+        except sr.UnknownValueError:
+            print("Unable to recognize speech.")
+            continue
+
+        # Generate and play a response
+        response_text = await generate_response(input_text)
+        communicate = edge_tts.Communicate()
+        with tempfile.NamedTemporaryFile() as temporary_file:
+            async for i in communicate.run(
+                response_text,
+                voice=VOICE,
+            ):
+                if i[2] is not None:
+                    temporary_file.write(i[2])
+            playsound(temporary_file.name)
 
 
-def play(engine):
-    engine.runAndWait()
-
-
-# Create a function to handle user input and generate a response using the OpenAI language model
-def handle_input(input_text):
-    # Generate a response using the OpenAI language model
-
-    response_text = generate_text(input_text)
-
-    # Convert the response text to speech
-    response_speech = text_to_speech(response_text)
-
-    # Return the generated speech
-    return response_speech
-
-
-# Create a new speech recognition object
-recognizer = sr.Recognizer()
-
-# Continuously listen for and handle user input
-while True:
-    # Listen for user input
-    with sr.Microphone() as source:
-        print("Listening for input...")
-        recognizer.adjust_for_ambient_noise(source, duration=1)
-        audio = recognizer.listen(source)
-
-    # Recognize the user's speech
-    try:
-        input_text = recognizer.recognize_google(audio)
-        print("Input text: " + str(input_text))
-    except sr.UnknownValueError:
-        print("Unable to recognize speech.")
-        continue
-
-    # Generate and play a response
-    response_speech = handle_input(input_text)
-    play(response_speech)
+if __name__ == "__main__":
+    asyncio.run(main())
