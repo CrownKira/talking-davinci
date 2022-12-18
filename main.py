@@ -29,20 +29,12 @@ async def generate_response(prompt):
     return response["choices"][0]["text"]
 
 
-<<<<<<< HEAD
-# Create a function to convert text to speech using a text-to-speech library or service
-def text_to_speech(text):
-    # Use a text-to-speech library or service to convert the text to speech
-    engine = pyttsx3.init()
-    engine.say(text)
-=======
 async def main():
     """
     Main function
     """
     # Create a new speech recognition object
     recognizer = sr.Recognizer()
->>>>>>> b94d508 (feat: Change TTS to Microsoft Server Speech Text to Speech Voice)
 
     # Continuously listen for and handle user input
     while True:
