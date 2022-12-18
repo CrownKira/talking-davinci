@@ -14,16 +14,20 @@ openai.api_key = os.environ["OPENAI_API_KEY"]
 
 
 # Customize the AI
-LANGUAGE = "zh-TW"
-VOICE = "Microsoft Server Speech Text to Speech Voice (zh-TW, HsiaoChenNeural)"
-CHARACTER = "farmer"
-TRAITS = "helpful, creative, clever, and very friendly"
+LANGUAGE = "en-GB"
+VOICE = "Microsoft Server Speech Text to Speech Voice (en-GB, MaisieNeural)"
+CHARACTER = "Goku"
+ANIME = "Dragon Ball"
+ARC = "Namek Saga"
 
 
-start_sequence: str = "\nAI:"
-restart_sequence: str = "\nHuman: "
+start_sequence: str = f"\n{CHARACTER}:"
+restart_sequence: str = f"\nMe: "
 # Set the initial value of acc_prompt
-acc_prompt = f"The following is a conversation with a {CHARACTER}. The {CHARACTER} is {TRAITS}.\n{restart_sequence} "
+acc_prompt = f"You have just appeared in front of {CHARACTER}, a character from the anime {ANIME}. {CHARACTER} is a character who lives in a world and has no knowledge of the outside world or the fact that they are from an anime. {CHARACTER} is curious about who you are and how you appeared in front of them. Please keep in mind that {CHARACTER} will remain true to their personality and beliefs as they exist in their world, and they will assume that you are also from their world. {CHARACTER} will never break character or mention the fact that they are from an anime. Try to engage in conversation as if you are truly interacting with this character and have a fun and immersive conversation with {CHARACTER}!"
+if ARC:
+    acc_prompt += f"{CHARACTER} is currently in the {ARC} arc of the anime"
+acc_prompt += f"\n{restart_sequence} "
 
 
 async def generate_response(prompt):
@@ -68,19 +72,29 @@ async def main():
 
     # Continuously listen for and handle user input
     while True:
-        # Listen for user input
-        with sr.Microphone() as source:
-            print("Listening for input...")
-            recognizer.adjust_for_ambient_noise(source, duration=1)
-            audio = recognizer.listen(source)
+        # Prompt the user to choose between keyboard and audio input
+        input_type = input(
+            "Press 'enter' for keyboard input or 'a' for audio input: "
+        )
+        if input_type == "a":
+            # Listen for user input through the microphone
+            with sr.Microphone() as source:
+                print("Listening for input...")
+                recognizer.adjust_for_ambient_noise(source, duration=1)
+                audio = recognizer.listen(source)
 
-        # Recognize the user's speech
-        try:
-            input_text = recognizer.recognize_google(audio, language=LANGUAGE)
-            print("Input text: " + str(input_text))
-        except sr.UnknownValueError:
-            print("Unable to recognize speech.")
-            continue
+            # Recognize the user's speech
+            try:
+                input_text = recognizer.recognize_google(
+                    audio, language=LANGUAGE
+                )
+                print("Input text: " + str(input_text))
+            except sr.UnknownValueError:
+                print("Unable to recognize speech.")
+                continue
+        else:
+            # Get user input from the keyboard
+            input_text = input("Enter your input: ")
 
         # Generate and play a response
         response_text = await generate_response(input_text)
