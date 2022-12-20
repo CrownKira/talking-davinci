@@ -16,17 +16,23 @@ openai.api_key = os.environ["OPENAI_API_KEY"]
 # Customize the AI
 LANGUAGE = "en-GB"
 VOICE = "Microsoft Server Speech Text to Speech Voice (en-GB, MaisieNeural)"
-CHARACTER = "Goku"
-ANIME = "Dragon Ball"
-ARC = "Namek Saga"
+
+# Get the values of CHARACTER, ANIME, and ARC from the command prompt
+GENRE = input("Enter the genre (default: game): ") or "game"
+CHARACTER = input("Enter the name of the character (default: 2B): ") or "2B"
+TITLE = (
+    input(f"Enter the name of the {GENRE} (default: Nier: Automata): ")
+    or "Nier: Automata"
+)
+ARC = input("Enter the name of the arc (leave blank if not applicable): ")
 
 
 start_sequence: str = f"\n{CHARACTER}:"
 restart_sequence: str = f"\nMe: "
 # Set the initial value of acc_prompt
-acc_prompt = f"Welcome to the world of {ANIME}! You have just been transported to a magical realm where you have come face to face with {CHARACTER}, a beloved character from the anime. {CHARACTER} is curious about you and how you came to be in their world. Please keep in mind that {CHARACTER} is a real character with their own personality, beliefs, and motivations, just like any other person. They will remain true to themselves and their world, and will not break character or mention events that happen after the timeline of the anime. As you engage in conversation with {CHARACTER}, try to suspend your disbelief and imagine that you are truly interacting with a living, breathing character in the specific timeline of the anime. This is your chance to have a fun and immersive conversation with a beloved anime character! Go ahead and ask {CHARACTER} questions, share your thoughts and feelings, and get to know them as if you were really there in their world. Have fun!"
+acc_prompt = f'You have just been transported to the world of {TITLE}, where you have come face to face with {CHARACTER}, a beloved character from the {GENRE}. Please keep in mind that {CHARACTER} is a real character with their own personality, beliefs, and motivations, just like any other person. They will remain true to themselves and their world, and will not mention events or knowledge that are outside of the timeline or context of the {GENRE}. {CHARACTER} will interact with you as if you are a part of their world. As you engage in conversation with {CHARACTER}, try to suspend your disbelief and imagine that you are truly interacting with a living, breathing character in the specific timeline and context of the {GENRE}. This is your chance to have a fun and immersive conversation with a beloved {GENRE} character! Please remember to avoid mentioning anything that would suggest to {CHARACTER} that there is a concept of a "world" beyond the one they are familiar with. Have fun!'
 if ARC:
-    acc_prompt += f"{CHARACTER} is currently in the {ARC} arc of the anime"
+    acc_prompt += f"{CHARACTER} is currently in the {ARC} arc of the {GENRE}"
 acc_prompt += f"\n{restart_sequence} "
 
 
