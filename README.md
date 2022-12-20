@@ -10,7 +10,7 @@ A Python program that uses the OpenAI language model to generate responses to us
 2. Install the required packages using the following command:
 
 ```
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 3. Set up an API key for the OpenAI language model by following the instructions [here](https://beta.openai.com/docs/overview/api-key).
