@@ -14,16 +14,26 @@ openai.api_key = os.environ["OPENAI_API_KEY"]
 
 
 # Customize the AI
-LANGUAGE = "zh-TW"
-VOICE = "Microsoft Server Speech Text to Speech Voice (zh-TW, HsiaoChenNeural)"
-CHARACTER = "farmer"
-TRAITS = "helpful, creative, clever, and very friendly"
+LANGUAGE = "en-GB"
+VOICE = "Microsoft Server Speech Text to Speech Voice (en-GB, MaisieNeural)"
+
+# Get the values of CHARACTER, ANIME, and ARC from the command prompt
+GENRE = input("Enter the genre (default: game): ") or "game"
+CHARACTER = input("Enter the name of the character (default: 2B): ") or "2B"
+TITLE = (
+    input(f"Enter the name of the {GENRE} (default: Nier: Automata): ")
+    or "Nier: Automata"
+)
+ARC = input("Enter the name of the arc (leave blank if not applicable): ")
 
 
-start_sequence: str = "\nAI:"
-restart_sequence: str = "\nHuman: "
+start_sequence: str = f"\n{CHARACTER}:"
+restart_sequence: str = f"\nMe: "
 # Set the initial value of acc_prompt
-acc_prompt = f"The following is a conversation with a {CHARACTER}. The {CHARACTER} is {TRAITS}.\n{restart_sequence} "
+acc_prompt = f'You have just been transported to the world of {TITLE}, where you have come face to face with {CHARACTER}, a beloved character from the {GENRE}. Please keep in mind that {CHARACTER} is a real character with their own personality, beliefs, and motivations, just like any other person. They will remain true to themselves and their world, and will not mention events or knowledge that are outside of the timeline or context of the {GENRE}. {CHARACTER} will interact with you as if you are a part of their world. As you engage in conversation with {CHARACTER}, try to suspend your disbelief and imagine that you are truly interacting with a living, breathing character in the specific timeline and context of the {GENRE}. This is your chance to have a fun and immersive conversation with a beloved {GENRE} character! Please remember to avoid mentioning anything that would suggest to {CHARACTER} that there is a concept of a "world" beyond the one they are familiar with. Have fun!'
+if ARC:
+    acc_prompt += f"{CHARACTER} is currently in the {ARC} arc of the {GENRE}"
+acc_prompt += f"\n{restart_sequence} "
 
 
 async def generate_response(prompt):
@@ -68,19 +78,29 @@ async def main():
 
     # Continuously listen for and handle user input
     while True:
-        # Listen for user input
-        with sr.Microphone() as source:
-            print("Listening for input...")
-            recognizer.adjust_for_ambient_noise(source, duration=1)
-            audio = recognizer.listen(source)
+        # Prompt the user to choose between keyboard and audio input
+        input_type = input(
+            "Press 'enter' for keyboard input or 'a' for audio input: "
+        )
+        if input_type == "a":
+            # Listen for user input through the microphone
+            with sr.Microphone() as source:
+                print("Listening for input...")
+                recognizer.adjust_for_ambient_noise(source, duration=1)
+                audio = recognizer.listen(source)
 
-        # Recognize the user's speech
-        try:
-            input_text = recognizer.recognize_google(audio, language=LANGUAGE)
-            print("Input text: " + str(input_text))
-        except sr.UnknownValueError:
-            print("Unable to recognize speech.")
-            continue
+            # Recognize the user's speech
+            try:
+                input_text = recognizer.recognize_google(
+                    audio, language=LANGUAGE
+                )
+                print("Input text: " + str(input_text))
+            except sr.UnknownValueError:
+                print("Unable to recognize speech.")
+                continue
+        else:
+            # Get user input from the keyboard
+            input_text = input("Enter your input: ")
 
         # Generate and play a response
         response_text = await generate_response(input_text)
